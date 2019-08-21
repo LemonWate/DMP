@@ -1,9 +1,12 @@
 package com.ETL
 
+import java.util.Properties
+
 import com.Utils.{SchemaUtils, Utils2Type}
+import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.{Row, SQLContext}
+import org.apache.spark.sql.{DataFrame, Row, SQLContext, SaveMode}
 
 
 /**
@@ -127,10 +130,32 @@ object txt2Parquet {
         )
       })
     // 构建DF
-    val df = sQLContext.createDataFrame(rowRDD, SchemaUtils.structtype)
+    val df: DataFrame = sQLContext.createDataFrame(rowRDD, SchemaUtils.structtype)
+    //创建临时表
+    df.registerTempTable("infos")
+    //要求一：
+    val res_df: DataFrame = sQLContext.sql("select count(cityname) ct ,provincename,cityname from infos group by provincename,cityname")
+    //合并分区使用coalesce不会触发shuffle  增加分区使用repartition
+    //        res_df.coalesce(4).write.format("json").save("dir/out1")
+
+    //    res_df.write.mode(SaveMode.Append).partitionBy("provincename","cityname").save(outputPath)
+
+    //要求二：
+    //加载配置文件需使用对应的依赖包
+//    val load: Config = ConfigFactory.load()
+//    val prop = new Properties()
+//    prop.setProperty("user", load.getString("jdbc.user"))
+//    prop.setProperty("password", load.getString("jdbc.password"))
+//    res_df.write.mode(SaveMode.Append).jdbc(load.getString("jdbc.url"), load.getString("jdbc.TableName"), prop)
+
+
+    //要求三：
+
+
     // 保存数据
-    //    df.write.parquet(outputPath)
+    //        df.write.parquet(outputPath)
     sc.stop()
 
   }
+
 }

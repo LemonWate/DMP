@@ -27,7 +27,6 @@
         </dependency>
 
 
-
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-graphx_2.10</artifactId>
@@ -35,7 +34,7 @@
         </dependency>
 
 
-
+        <!--加载conf配置的文件-->
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
@@ -96,6 +95,12 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.10</artifactId>
             <version>1.6.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.38</version>
         </dependency>
 
 
