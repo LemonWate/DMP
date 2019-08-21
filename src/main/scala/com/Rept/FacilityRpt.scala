@@ -1,18 +1,17 @@
 package com.Rept
 
 import com.Utils.RptUtils
-import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SQLContext}
-
 
 /**
   * @Author HanDong
   * @Date 2019/8/21 
   * @Description
-  * 地域分布指标
+  *             设备类指标
   **/
-object LocationRpt {
+object FacilityRpt {
   def main(args: Array[String]): Unit = {
     // 判断路径是否正确
     if (args.length != 2) {
@@ -30,7 +29,7 @@ object LocationRpt {
     //获取数据
     val df: DataFrame = sQLContext.read.parquet(inputPath)
     //对数据进行处理，统计各个指标
-    val resRDD: RDD[((String, String), List[Double])] = df.map(row => {
+    val resRDD: RDD[(Int, List[Double])] = df.map(row => {
       //取到所有需要的字段
       val requestmode = row.getAs[Int]("requestmode")
       val processnode = row.getAs[Int]("processnode")
@@ -42,22 +41,28 @@ object LocationRpt {
       val winprice = row.getAs[Double]("winprice")
       val adpayment = row.getAs[Double]("adpayment")
 
-      //key的值是省市
-      val pro = row.getAs[String]("provincename")
-      val city = row.getAs[String]("cityname")
+      //key是设备的类型名称
+      val devicetype = row.getAs[Int]("devicetype")
 
       val post = RptUtils.request(requestmode, processnode)
       val clik = RptUtils.clik(requestmode, iseffective)
       val ad = RptUtils.Ad(iseffective, isbilling, isbid, iswin, adorderid, winprice, adpayment)
 
       val res: List[Double] = post ::: clik ::: ad
-      ((pro, city), res)
+      (devicetype, res)
     })
-    val res: RDD[((String, String), List[Double])] = resRDD.reduceByKey((x,y)=>(x zip y).map(x=>x._1+x._2))
-    // 格式： 省份，城市 原始请求 有效请求 广告请求 参与竞价数 成功竞价数 广告展示量 广告点击量 千人消费 千人成本
-    res.collect.foreach(x=>println(x._1._1+","+x._1._2+" "+x._2(0)+" "+x._2(1)+" "+x._2(2)+" "+x._2(5)+" "+x._2(6)+" "+x._2(3)+" "+x._2(4)+" "+x._2(7)+" "+x._2(8)))
+    val res: RDD[(Int, List[Double])] = resRDD.reduceByKey((x,y)=>(x zip y).map(x=>x._1+x._1))
+    res.collect.foreach(x=>println(transform(x._1)+" "+x._2(0)+" "+x._2(1)+" "+x._2(2)+" "+x._2(5)+" "+x._2(6)+" "+x._2(3)+" "+x._2(4)+" "+x._2(7)+" "+x._2(8)))
 
-
+  }
+  def transform(it:Int):String={
+    if (it == 1){
+      "手机"
+    }else if(it == 2){
+      "平板"
+    }else{
+      "其他"
+    }
   }
 
 }

@@ -153,7 +153,7 @@ object txt2Parquet {
 
 
     // 保存数据
-    //        df.write.parquet(outputPath)
+            df.write.parquet(outputPath)
     sc.stop()
 
   }
