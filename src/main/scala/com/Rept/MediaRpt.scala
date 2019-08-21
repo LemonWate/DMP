@@ -1,6 +1,7 @@
 package com.Rept
 
 import com.Utils.RptUtils
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{DataFrame, SQLContext}
@@ -10,9 +11,9 @@ import org.apache.spark.sql.{DataFrame, SQLContext}
   * @Author HanDong
   * @Date 2019/8/21 
   * @Description
-  * 地域分布指标
+  *             媒体分析
   **/
-object LocationRpt {
+object MediaRpt {
   def main(args: Array[String]): Unit = {
     // 判断路径是否正确
     if (args.length != 2) {
@@ -27,10 +28,26 @@ object LocationRpt {
     // 创建执行入口
     val sc = new SparkContext(conf)
     val sQLContext = new SQLContext(sc)
-    //获取数据
+    //获取字典数据
+    val lines: RDD[String] = sc.textFile("D://Desktop/BigData22/22Spark项目/项目day01/Spark用户画像分析/app_dict.txt")
+
+    val idAndNameRDD: RDD[(String, String)] = lines.filter(_.length > 4).map(x => {
+      val sts: Array[String] = x.split("\t")
+      var name: String = sts(1).trim
+      var id: String = sts(4).trim
+
+      (id, name)
+    })
+    val dic: Map[String, String] = idAndNameRDD.collect.toMap
+
+    //广播字典数据
+    val bro_dic: Broadcast[Map[String, String]] = sc.broadcast(dic)
+
+
+    //获取指标数据
     val df: DataFrame = sQLContext.read.parquet(inputPath)
     //对数据进行处理，统计各个指标
-    val resRDD: RDD[((String, String), List[Double])] = df.map(row => {
+    val resRDD: RDD[(String, List[Double])] = df.map(row => {
       //取到所有需要的字段
       val requestmode = row.getAs[Int]("requestmode")
       val processnode = row.getAs[Int]("processnode")
@@ -41,27 +58,35 @@ object LocationRpt {
       val adorderid = row.getAs[Int]("adorderid")
       val winprice = row.getAs[Double]("winprice")
       val adpayment = row.getAs[Double]("adpayment")
-
-      //key的值是省市
-      val pro = row.getAs[String]("provincename")
-      val city = row.getAs[String]("cityname")
-
+      //整合指标数据
       val post = RptUtils.request(requestmode, processnode)
       val clik = RptUtils.clik(requestmode, iseffective)
       val ad = RptUtils.Ad(iseffective, isbilling, isbid, iswin, adorderid, winprice, adpayment)
 
       val res: List[Double] = post ::: clik ::: ad
-      ((pro, city), res)
+
+      //key的值由appname决定，当appname不存在时，要根据appid去字典查找其name
+      val appName = row.getAs[String]("appname")
+      val appId = row.getAs[String]("appid")
+
+      def transform(name: String, id: String): String = {
+        if (name != "") {
+          return name
+        } else {
+          return bro_dic.value.getOrElse(id, "其他")
+        }
+      }
+
+      (transform(appName, appId), res)
     })
-    val res: RDD[((String, String), List[Double])] = resRDD.reduceByKey((x,y)=>(x zip y).map(x=>x._1+x._2))
+    //对数据进行聚合
+    val res: RDD[(String, List[Double])] = resRDD.reduceByKey((x, y) => (x zip (y)).map(t => t._1 + t._2))
 
-//    res.map(t=>{t._1+","+t._2.mkString(",")})
-    // 格式： 省份，城市 原始请求 有效请求 广告请求 参与竞价数 成功竞价数 广告展示量 广告点击量 千人消费 千人成本
-    res.collect.foreach(x=>println(x._1._1+","+x._1._2+" "+x._2(0)+" "+x._2(1)+" "+x._2(2)+" "+x._2(5)+" "+x._2(6)+" "+x._2(3)+" "+x._2(4)+" "+x._2(7)+" "+x._2(8)))
+    res.collect.foreach(x => println(x._1 + " " + x._2(0) + " " + x._2(1) + " " + x._2(2) + " " + x._2(5) + " " + x._2(6) + " " + x._2(3) + " " + x._2(4) + " " + x._2(7) + " " + x._2(8)))
 
-    //作业：存入mysql 使用foreachPartition
-    //需要自己写连接池
 
+    sc.stop()
   }
+
 
 }
