@@ -1,14 +1,18 @@
 package com.Rept
 
-import com.Utils.RptUtils
+import java.sql.{Connection, PreparedStatement}
+
+import com.Utils.{MysqlPoolUtils, RptUtils}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{DataFrame, SQLContext}
 
+import scala.collection.mutable.ListBuffer
+
 
 /**
   * @Author HanDong
-  * @Date 2019/8/21 
+  * @Date 2019/8/21
   * @Description
   * 地域分布指标
   **/
@@ -53,15 +57,37 @@ object LocationRpt {
       val res: List[Double] = post ::: clik ::: ad
       ((pro, city), res)
     })
-    val res: RDD[((String, String), List[Double])] = resRDD.reduceByKey((x,y)=>(x zip y).map(x=>x._1+x._2))
+    val res: RDD[((String, String), List[Double])] = resRDD.reduceByKey((x, y) => (x zip y).map(x => x._1 + x._2))
 
-//    res.map(t=>{t._1+","+t._2.mkString(",")})
+    //    res.map(t=>{t._1+","+t._2.mkString(",")})
     // 格式： 省份，城市 原始请求 有效请求 广告请求 参与竞价数 成功竞价数 广告展示量 广告点击量 千人消费 千人成本
-    res.collect.foreach(x=>println(x._1._1+","+x._1._2+" "+x._2(0)+" "+x._2(1)+" "+x._2(2)+" "+x._2(5)+" "+x._2(6)+" "+x._2(3)+" "+x._2(4)+" "+x._2(7)+" "+x._2(8)))
+    res.collect.foreach(x => println(x._1._1 + "," + x._1._2 + " " + x._2(0) + " " + x._2(1) + " " + x._2(2) + " " + x._2(5) + " " + x._2(6) + " " + x._2(3) + " " + x._2(4) + " " + x._2(7) + " " + x._2(8)))
 
     //作业：存入mysql 使用foreachPartition
     //需要自己写连接池
+    //自己实现：使用的druid
 
+    res.foreachPartition(item=>{
+      item.foreach(info => {
+
+          val conn = MysqlPoolUtils.getConnection.get
+          val sql = "insert into LocationRpt values(?,?,?,?,?,?,?,?,?,?,?)"
+          var statement = conn.prepareStatement(sql)
+          statement.setString(1, info._1._1)
+          statement.setString(2,info._1._2 )
+          statement.setDouble(3, info._2(0))
+          statement.setDouble(4, info._2(1))
+          statement.setDouble(5, info._2(2))
+          statement.setDouble(6, info._2(5))
+          statement.setDouble(7, info._2(6))
+          statement.setDouble(8, info._2(3))
+          statement.setDouble(9, info._2(4))
+          statement.setDouble(10, info._2(7))
+          statement.setDouble(11, info._2(8))
+          statement.execute()
+
+          conn.close()
+      })
+    })
   }
-
 }

@@ -122,26 +122,6 @@ object Demo_target {
         Utils2Type.toInt(arr(84)))
     })
 
-
-    //    rdd.map(x => {
-    //      val imei = x(46)
-    //      val mac = x(47)
-    //      val idfa = x(48)
-    //      val openudid = x(49)
-    //      val androidid = x(50)
-    //
-    //      val imeimd5 = x(61)
-    //      val macmd5 = x(62)
-    //      val idfamd5 = x(63)
-    //      val openudidmd5 = x(64)
-    //      val androididmd5 = x(65)
-    //      val imeisha1 = x(66)
-    //      val macsha1 = x(67)
-    //      val idfasha1 = x(68)
-    //      val openudidsha1 = x(69)
-    //      val androididsha1 = x(70)
-    //    })
-
     val df: DataFrame = sQLContext.createDataFrame(rdd)
     df.registerTempTable("t")
     //测试数据
@@ -149,17 +129,6 @@ object Demo_target {
 
     //SQL展示
     sQLContext.sql("select case \nwhen imei <> \"\" then imei \nwhen mac <> \"\" then mac \nwhen idfa <> \"\" then idfa \nwhen openudid <> \"\" then openudid \nwhen androidid <> \"\" then androidid \nwhen imeimd5 <>\"\" then imeimd5 \nwhen macmd5 <> \"\" then macmd5 \nwhen idfamd5 <> \"\" then idfamd5 \nwhen openudidmd5 <> \"\" then openudidmd5 \nwhen androididmd5 <> \"\" then androididmd5 \nwhen imeisha1 <> \"\" then imeisha1 \nwhen macsha1 <> \"\" then macsha1 \nwhen idfasha1 <> \"\" then idfasha1 \nwhen openudidsha1 <> \"\" then openudidsha1 \nwhen androididsha1 <> \"\" then androididsha1 \nend,\nsum(case when requestmode=1 and processnode>=1 then 1 else 0 end),\nsum(case when requestmode=1 and processnode>=2 then 1 else 0 end),\nsum(case when requestmode=1 and processnode=3 then 1 else 0 end),\nsum(case when iseffective=1 and isbilling=1 and isbid=1 then 1 else 0 end),\nsum(case when iseffective=1 and isbilling=1 and iswin=1 and adorderid != 0 then 1 else 0 end),\nsum(case when requestmode=2 and iseffective=1 then 1 else 0 end),\nsum(case when requestmode=3 and iseffective=1 then 1 else 0 end),\nsum(case when iseffective=1 and isbilling=1 and iswin=1 then winprice else 0 end)/1000,\nsum(case when iseffective=1 and isbilling=1 and iswin=1 then adpayment else 0 end)/1000\nfrom t \ngroup by (case \nwhen imei <> \"\" then imei \nwhen mac <> \"\" then mac \nwhen idfa <> \"\" then idfa \nwhen openudid <> \"\" then openudid \nwhen androidid <> \"\" then androidid \nwhen imeimd5 <>\"\" then imeimd5 \nwhen macmd5 <> \"\" then macmd5 \nwhen idfamd5 <> \"\" then idfamd5 \nwhen openudidmd5 <> \"\" then openudidmd5 \nwhen androididmd5 <> \"\" then androididmd5\nwhen imeisha1 <> \"\" then imeisha1 \nwhen macsha1 <> \"\" then macsha1 \nwhen idfasha1 <> \"\" then idfasha1 \nwhen openudidsha1 <> \"\" then openudidsha1 \nwhen androididsha1 <> \"\" then androididsha1 \nend)").show()
-
-
-
-
-
-
-
-
-
-
-
     sc.stop()
   }
 }
