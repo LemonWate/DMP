@@ -68,6 +68,8 @@ object LocationRpt {
     //自己实现：使用的druid
 
     res.foreachPartition(item=>{
+
+
       item.foreach(info => {
 
           val conn = MysqlPoolUtils.getConnection.get
