@@ -67,7 +67,12 @@ object TagsContext {
         })
         con.close()
         tup
-      }).foreach(x=>println(x))
+      }).reduceByKey((list1,list2)=>
+      (list1:::list2)
+      .groupBy(_._1)
+      .mapValues(_.foldLeft[Int](0)(_+_._2))
+      .toList
+    ).foreach(println)
 
     sc.stop()
 
