@@ -12,12 +12,6 @@ import org.apache.commons.lang3.StringUtils
   * object 这是创建的单例对象
   **/
 object TagsUtils {
-
-
-
-
-
-
   //过滤所需字段
   val OneUserId =
     """
@@ -31,20 +25,20 @@ object TagsUtils {
   def getOneUserId(row:Row):String={
     row match {
       case v if StringUtils.isNoneBlank(v.getAs[String]("imei")) =>"IM: "+v.getAs[String]("imei")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("mac")) =>"IM: "+v.getAs[String]("mac")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("openudid")) =>"IM: "+v.getAs[String]("openudid")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("androidid")) =>"IM: "+v.getAs[String]("androidid")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("idfa")) =>"IM: "+v.getAs[String]("idfa")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("imeimd5")) =>"IM: "+v.getAs[String]("imeimd5")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("macmd5")) =>"IM: "+v.getAs[String]("macmd5")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("openudidmd5")) =>"IM: "+v.getAs[String]("openudidmd5")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("androididmd5")) =>"IM: "+v.getAs[String]("androididmd5")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("idfamd5")) =>"IM: "+v.getAs[String]("idfamd5")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("imeisha1")) =>"IM: "+v.getAs[String]("imeisha1")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("macsha1")) =>"IM: "+v.getAs[String]("macsha1")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("openudidsha1")) =>"IM: "+v.getAs[String]("openudidsha1")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("androididsha1")) =>"IM: "+v.getAs[String]("androididsha1")
-      case v if StringUtils.isNoneBlank(v.getAs[String]("idfasha1")) =>"IM: "+v.getAs[String]("idfasha1")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("mac")) =>"MC: "+v.getAs[String]("mac")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("openudid")) =>"OPEN: "+v.getAs[String]("openudid")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("androidid")) =>"ANDR: "+v.getAs[String]("androidid")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("idfa")) =>"ID: "+v.getAs[String]("idfa")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("imeimd5")) =>"IM5: "+v.getAs[String]("imeimd5")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("macmd5")) =>"MC5: "+v.getAs[String]("macmd5")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("openudidmd5")) =>"OPEN5: "+v.getAs[String]("openudidmd5")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("androididmd5")) =>"ANDR5: "+v.getAs[String]("androididmd5")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("idfamd5")) =>"ID5: "+v.getAs[String]("idfamd5")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("imeisha1")) =>"IM1: "+v.getAs[String]("imeisha1")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("macsha1")) =>"MC1: "+v.getAs[String]("macsha1")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("openudidsha1")) =>"OPEN1: "+v.getAs[String]("openudidsha1")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("androididsha1")) =>"ANDR1: "+v.getAs[String]("androididsha1")
+      case v if StringUtils.isNoneBlank(v.getAs[String]("idfasha1")) =>"ID1: "+v.getAs[String]("idfasha1")
     }
 
   }

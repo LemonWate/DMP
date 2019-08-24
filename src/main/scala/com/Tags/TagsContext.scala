@@ -30,13 +30,13 @@ object TagsContext {
     //读取数据
     val df: DataFrame = sQLContext.read.parquet(inputPath)
     val map = sc.textFile(dirPath).map(_.split("\t", -1)).filter(_.length >= 5).map(arr => (arr(4), arr(1))).collectAsMap()
-    val jedis = JedisConnectionPool.getConnections()
-    map.foreach(x => {
-      val appid = x._1
-      val name = x._2
-      jedis.hset("AppInfo233", appid, name)
-    })
-    jedis.close()
+//    val jedis = JedisConnectionPool.getConnections()
+//    map.foreach(x => {
+//      val appid = x._1
+//      val name = x._2
+//      jedis.hset("dic", appid, name)
+//    })
+//    jedis.close()
 
     //    //广播
     //    val broadcast = sc.broadcast(map)
@@ -48,14 +48,13 @@ object TagsContext {
     df.filter(TagsUtils.OneUserId)
       .mapPartitions(part => {
         val con = JedisConnectionPool.getConnections()
-        val tuples= part.map(row => {
-          //取出用户id
+        val tup = part.map(row => {
+          //            取出用户id
           val userId = TagsUtils.getOneUserId(row)
           //接下来通过row数据  打上所有标签（按需求）
           val adList = TagsAd.makeTags(row)
 
-          //      val appName = TagsAppName.makeTags(row, broadcast)
-          val appName = TagsAppName.makeTags(row, con)
+          val appName = TagsAppRedies.makeTags(row,con)
 
           val channel = TagsChannel.makeTags(row)
 
@@ -67,9 +66,9 @@ object TagsContext {
           (userId, adList ::: appName ::: channel ::: facility ::: keyWords ::: region)
         })
         con.close()
-        tuples
+        tup
+      }).foreach(x=>println(x))
 
-      })
     sc.stop()
 
   }
