@@ -1,6 +1,6 @@
 package com.Tags
 
-import com.Utils.{JedisConnectionPool, Tag}
+import com.Utils.Tag
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.Row
 import redis.clients.jedis.Jedis
